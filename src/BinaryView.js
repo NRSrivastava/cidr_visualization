@@ -1,6 +1,7 @@
 import React from 'react';
 import './BinaryView.css';
 import { getCidrInfo } from './helpers.js';
+import { IPV4_BITS, BITS_PER_OCTET } from './constants.js';
 
 const BinaryView = ({ cidrList, selectedCidr, theme }) => {
   const entry = selectedCidr ? cidrList.find(c => c.cidr === selectedCidr) : null;
@@ -25,7 +26,7 @@ const BinaryView = ({ cidrList, selectedCidr, theme }) => {
 
   const ipToBits = (ip) =>
     ip.split('.').map(octet =>
-      Array.from({ length: 8 }, (_, i) => (Number(octet) >> (7 - i)) & 1)
+      Array.from({ length: BITS_PER_OCTET }, (_, i) => (Number(octet) >> (BITS_PER_OCTET - 1 - i)) & 1)
     );
 
   return (
@@ -43,7 +44,7 @@ const BinaryView = ({ cidrList, selectedCidr, theme }) => {
           </span>
           <span className="legend-item">
             <span className="legend-swatch legend-swatch--host" />
-            Host bits &nbsp;<strong>{32 - prefix}</strong>
+            Host bits &nbsp;<strong>{IPV4_BITS - prefix}</strong>
           </span>
         </div>
       </div>
@@ -91,12 +92,12 @@ const BinaryView = ({ cidrList, selectedCidr, theme }) => {
       <div className="binary-span-bar">
         <div
           className="span-net"
-          style={{ width: `${(prefix / 32) * 100}%`, background: `${color}55` }}
+          style={{ width: `${(prefix / IPV4_BITS) * 100}%`, background: `${color}55` }}
         >
           {prefix > 4 && <span>/{prefix} network</span>}
         </div>
         <div className="span-host">
-          {(32 - prefix) > 4 && <span>{32 - prefix} host</span>}
+          {(IPV4_BITS - prefix) > 4 && <span>{IPV4_BITS - prefix} host</span>}
         </div>
       </div>
 

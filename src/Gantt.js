@@ -1,25 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 import { numberToIpv4 } from './helpers.js';
+import { IPV4_MAX, MIN_BAR_PX, GANTT_THEME } from './constants.js';
 import './Gantt.css';
-
-const FULL_END = 4294967295; // 255.255.255.255 as uint32
-const MIN_BAR_PX = 2;        // minimum rendered bar width in pixels
-
-const THEME = {
-  dark: {
-    chartBg:   '#0a1628',
-    axisText:  '#6b7280',
-    axisLine:  '#374151',
-    emptyHint: '#445566',
-  },
-  light: {
-    chartBg:   '#f0f9ff',
-    axisText:  '#1e293b',
-    axisLine:  '#60a5fa',
-    emptyHint: '#64748b',
-  },
-};
 
 const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dark' }) => {
   const svgRef = useRef();
@@ -34,12 +17,12 @@ const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dar
     const margin = { top: 20, right: 30, bottom: 65, left: 150 };
     const chartWidth = width - margin.left - margin.right;
     const chartHeight = height - margin.top - margin.bottom;
-    const colors = THEME[theme] || THEME.dark;
+    const colors = GANTT_THEME[theme] || GANTT_THEME.dark;
 
     svg.selectAll('*').remove();
 
     const xScale = d3.scaleLinear()
-      .domain([0, FULL_END])
+      .domain([0, IPV4_MAX])
       .range([margin.left, width - margin.right]);
 
     const yScale = d3.scaleBand()
@@ -111,7 +94,7 @@ const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dar
     }
 
     const zoom = d3.zoom()
-      .scaleExtent([1, FULL_END])
+      .scaleExtent([1, IPV4_MAX])
       .translateExtent([[margin.left, 0], [width - margin.right, height]])
       .extent([[margin.left, 0], [width - margin.right, height]])
       .on('zoom', zoomed);
@@ -147,10 +130,10 @@ const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dar
       const pad      = range * 0.15;
 
       const viewStart = Math.max(0,        minStart - pad);
-      const viewEnd   = Math.min(FULL_END, maxEnd   + pad);
+      const viewEnd   = Math.min(IPV4_MAX, maxEnd   + pad);
       const viewRange = viewEnd - viewStart;
 
-      const k  = FULL_END / viewRange;
+      const k  = IPV4_MAX / viewRange;
       const tx = margin.left - k * xScale(viewStart);
 
       transformRef.current = d3.zoomIdentity.translate(tx, 0).scale(k);

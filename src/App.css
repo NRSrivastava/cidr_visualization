@@ -102,8 +102,6 @@
 
 .sidebar {
   flex-shrink: 0;
-  min-width: 150px;
-  max-width: 520px;
   overflow-y: auto;
 }
 

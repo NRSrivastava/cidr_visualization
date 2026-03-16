@@ -3,11 +3,7 @@ import './App.css';
 import Gantt from './Gantt.js';
 import { getCidrInfo } from './helpers.js';
 import BinaryView from './BinaryView.js';
-
-const COLORS = [
-  '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
-  '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac',
-];
+import { CIDR_COLORS, LAYOUT } from './constants.js';
 
 const validateCidr = (cidr) => {
   if (!/^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/.test(cidr)) return false;
@@ -24,11 +20,12 @@ function App() {
   const [fitTrigger, setFitTrigger] = useState(0);
   const [theme, setTheme] = useState('dark');
 
-  // Pane sizes
-  const [sidebarWidth, setSidebarWidth] = useState(315);
-  const [ganttHeight, setGanttHeight] = useState(400);
+  // Pane sizes — initialised from viewport so proportions hold at any resolution
+  const usableH = () => window.innerHeight - LAYOUT.HEADER_HEIGHT_PX;
+  const [sidebarWidth, setSidebarWidth] = useState(() => Math.round(window.innerWidth * LAYOUT.SIDEBAR_INIT_VW));
+  const [ganttHeight,  setGanttHeight]  = useState(() => Math.round(usableH() * LAYOUT.GANTT_INIT_VH));
+  const [listHeight,   setListHeight]   = useState(() => Math.round(usableH() * LAYOUT.LIST_INIT_VH));
   const [chartAreaWidth, setChartAreaWidth] = useState(800);
-  const [listHeight, setListHeight] = useState(280);
   const chartAreaRef = useRef(null);
 
   useEffect(() => {
@@ -44,7 +41,9 @@ function App() {
     e.preventDefault();
     const startX = e.clientX;
     const startW = sidebarWidth;
-    const onMove = (ev) => setSidebarWidth(Math.max(150, Math.min(520, startW + ev.clientX - startX)));
+    const minW = Math.round(window.innerWidth * LAYOUT.SIDEBAR_MIN_VW);
+    const maxW = Math.round(window.innerWidth * LAYOUT.SIDEBAR_MAX_VW);
+    const onMove = (ev) => setSidebarWidth(Math.max(minW, Math.min(maxW, startW + ev.clientX - startX)));
     const onUp   = ()  => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
@@ -54,7 +53,8 @@ function App() {
     e.preventDefault();
     const startY = e.clientY;
     const startH = listHeight;
-    const onMove = (ev) => setListHeight(Math.max(60, startH + ev.clientY - startY));
+    const minH = Math.round(window.innerHeight * LAYOUT.LIST_MIN_VH);
+    const onMove = (ev) => setListHeight(Math.max(minH, startH + ev.clientY - startY));
     const onUp   = ()  => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
@@ -64,7 +64,9 @@ function App() {
     e.preventDefault();
     const startY = e.clientY;
     const startH = ganttHeight;
-    const onMove = (ev) => setGanttHeight(Math.max(150, Math.min(900, startH + ev.clientY - startY)));
+    const minH = Math.round(window.innerHeight * LAYOUT.GANTT_MIN_VH);
+    const maxH = Math.round(window.innerHeight * LAYOUT.GANTT_MAX_VH);
+    const onMove = (ev) => setGanttHeight(Math.max(minH, Math.min(maxH, startH + ev.clientY - startY)));
     const onUp   = ()  => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
@@ -74,7 +76,7 @@ function App() {
     const trimmed = cidrInput.trim();
     if (!validateCidr(trimmed)) { alert('Invalid CIDR format'); return; }
     if (cidrList.find(c => c.cidr === trimmed)) { alert('CIDR already added'); return; }
-    const color = COLORS[cidrList.length % COLORS.length];
+    const color = CIDR_COLORS[cidrList.length % CIDR_COLORS.length];
     setCidrList([...cidrList, { cidr: trimmed, color }]);
     setCidrInput('');
   };
