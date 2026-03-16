@@ -1,0 +1,312 @@
+* {
+  box-sizing: border-box;
+}
+
+/* ── Dark theme (default) ─────────────────────── */
+.App {
+  --bg:               #111827;
+  --bg-panel:         #1f2937;
+  --bg-input:         #1f2937;
+  --bg-item:          #1f2937;
+  --border:           #374151;
+  --border-faint:     #1f2937;
+  --text:             #d1d5db;
+  --text-dim:         #6b7280;
+  --text-muted:       #4b5563;
+  --accent:           #93c5fd;
+  --btn-bg:           #1d4ed8;
+  --btn-hover:        #2563eb;
+  --remove-hover:     #ef4444;
+  --selected-bg:      #1e3a5f;
+  --selected-border:  #60a5fa;
+  --info-value:       #d1d5db;
+  --fit-color:        #6b7280;
+  --fit-hover-border: #60a5fa;
+  --fit-hover-color:  #93c5fd;
+  --empty-hint:       #4b5563;
+
+  padding: 20px 24px;
+  font-family: 'Courier New', Consolas, monospace;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ── Light theme ──────────────────────────────── */
+.App.light {
+  --bg:               #bfdbfe;   /* saturated blue — white panels clearly pop */
+  --bg-panel:         #ffffff;
+  --bg-input:         #ffffff;
+  --bg-item:          #ffffff;
+  --border:           #3b82f6;   /* strong visible blue */
+  --border-faint:     #93c5fd;
+  --text:             #0f172a;   /* near-black for max readability */
+  --text-dim:         #1d4ed8;
+  --text-muted:       #374151;
+  --accent:           #1d4ed8;
+  --btn-bg:           #1d4ed8;
+  --btn-hover:        #1e40af;
+  --remove-hover:     #dc2626;
+  --selected-bg:      #dbeafe;
+  --selected-border:  #1d4ed8;
+  --info-value:       #0f172a;
+  --fit-color:        #374151;
+  --fit-hover-border: #1d4ed8;
+  --fit-hover-color:  #1d4ed8;
+  --empty-hint:       #475569;
+}
+
+/* ── Header ───────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.App h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Layout ───────────────────────────────────── */
+
+.layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.sidebar {
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+/* ── Drag dividers ────────────────────────────── */
+
+.divider {
+  flex-shrink: 0;
+  background: var(--border-faint);
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+
+.divider:hover,
+.divider:active {
+  background: var(--accent);
+}
+
+.divider-v {
+  width: 5px;
+  align-self: stretch;
+  cursor: col-resize;
+  margin: 0 2px;
+}
+
+.divider-h {
+  width: 100%;
+  height: 5px;
+  cursor: row-resize;
+  margin: 4px 0;
+}
+
+.chart-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── CIDR input ───────────────────────────────── */
+
+.cidr-input {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.cidr-input input {
+  flex: 1;
+  padding: 6px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.cidr-input input::placeholder {
+  color: var(--text-muted);
+}
+
+.cidr-input input:focus {
+  border-color: var(--accent);
+}
+
+.cidr-input button {
+  padding: 6px 12px;
+  background: var(--btn-bg);
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.cidr-input button:hover {
+  background: var(--btn-hover);
+}
+
+/* ── Fit button ───────────────────────────────── */
+
+.fit-btn {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--fit-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.fit-btn:hover {
+  border-color: var(--fit-hover-border);
+  color: var(--fit-hover-color);
+}
+
+/* ── CIDR list ────────────────────────────────── */
+
+.cidr-list {
+  margin-bottom: 14px;
+}
+
+.empty-hint {
+  color: var(--empty-hint);
+  font-size: 0.78rem;
+  text-align: center;
+  padding: 10px 0;
+  margin: 0;
+}
+
+.cidr-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+  background: var(--bg-item);
+  user-select: none;
+  transition: border-color 0.1s, background 0.1s;
+}
+
+.cidr-item:hover {
+  border-color: var(--border);
+}
+
+.cidr-item.selected {
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
+}
+
+.cidr-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.cidr-label {
+  flex: 1;
+  color: var(--text);
+}
+
+.cidr-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0 2px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.cidr-remove:hover {
+  color: var(--remove-hover);
+}
+
+/* ── Calculation panel ────────────────────────── */
+
+.cidr-info {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.cidr-info-title {
+  font-size: 0.88rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 10px;
+  word-break: break-all;
+}
+
+.cidr-info table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+}
+
+.cidr-info td {
+  padding: 2px 0;
+  vertical-align: top;
+}
+
+.cidr-info td:first-child {
+  color: var(--text-dim);
+  padding-right: 10px;
+  white-space: nowrap;
+  width: 50%;
+}
+
+.cidr-info td:last-child {
+  color: var(--info-value);
+}
