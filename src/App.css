@@ -66,6 +66,19 @@
   margin-bottom: 20px;
 }
 
+.header-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.header-tagline {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  opacity: 0.75;
+}
+
 .App h1 {
   margin: 0;
   font-size: 1.3rem;
@@ -96,13 +109,16 @@
 
 .layout {
   display: flex;
-  gap: 20px;
-  align-items: flex-start;
+  gap: 5px;
+  align-items: stretch;
+  min-height: calc(100vh - 80px);
 }
 
 .sidebar {
   flex-shrink: 0;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Drag dividers ────────────────────────────── */
@@ -136,6 +152,8 @@
 .chart-area {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── CIDR input ───────────────────────────────── */

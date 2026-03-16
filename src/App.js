@@ -25,7 +25,9 @@ function App() {
   const [sidebarWidth, setSidebarWidth] = useState(() => Math.round(window.innerWidth * LAYOUT.SIDEBAR_INIT_VW));
   const [ganttHeight,  setGanttHeight]  = useState(() => Math.round(usableH() * LAYOUT.GANTT_INIT_VH));
   const [listHeight,   setListHeight]   = useState(() => Math.round(usableH() * LAYOUT.LIST_INIT_VH));
-  const [chartAreaWidth, setChartAreaWidth] = useState(800);
+  const [chartAreaWidth, setChartAreaWidth] = useState(
+    () => Math.round(window.innerWidth * (1 - LAYOUT.SIDEBAR_INIT_VW) - 60)
+  );
   const chartAreaRef = useRef(null);
 
   useEffect(() => {
@@ -97,7 +99,10 @@ function App() {
     <div className={`App ${theme === 'light' ? 'light' : ''}`}>
 
       <div className="header">
-        <h1>IPv4 CIDR Visualizer</h1>
+        <div className="header-title">
+          <h1>CIDR Lens</h1>
+          <span className="header-tagline">IPv4 CIDR Calculator &amp; Visualizer</span>
+        </div>
         <button
           className="theme-toggle"
           onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}

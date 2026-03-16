@@ -5,6 +5,7 @@ export const IPV4_MAX         = 4294967295; // 0xFFFFFFFF — 255.255.255.255 as
 
 // ── Chart rendering ────────────────────────────────────────────────────────
 export const MIN_BAR_PX       = 2;   // minimum bar width so sub-pixel CIDRs stay visible
+export const SVG_OVERFLOW_PAD = 15;  // extra px on SVG wrapper to prevent axis label clipping
 
 // ── CIDR colour palette (Tableau-10) ──────────────────────────────────────
 export const CIDR_COLORS = [
@@ -20,11 +21,11 @@ export const LAYOUT = {
   SIDEBAR_MIN_VW:     0.10,  // drag minimum
   SIDEBAR_MAX_VW:     0.40,  // drag maximum
 
-  GANTT_INIT_VH:      0.55,  // gantt chart starting height
+  GANTT_INIT_VH:      0.65,  // gantt chart starting height
   GANTT_MIN_VH:       0.15,
   GANTT_MAX_VH:       0.85,
 
-  LIST_INIT_VH:       0.40,  // CIDR list starting height inside sidebar
+  LIST_INIT_VH:       0.54,  // CIDR list starting height inside sidebar
   LIST_MIN_VH:        0.05,
 };
 
