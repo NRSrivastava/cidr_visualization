@@ -1,4 +1,4 @@
-export const numberToIpv4 = (num) => (
+export const numberToIpv4 = (num) => (num>4294967295 ? '':
     [(num >>> 24) & 255, (num >>> 16) & 255, (num >>> 8) & 255, num & 255]
     .join('.'));
 

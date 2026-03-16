@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import * as d3 from 'd3';
 import './App.css';
+import './react-resizable.css'
 import Gantt from './Gantt.js';
+import { ResizableBox } from 'react-resizable';
 
 function App() {
   const [cidrList, setCidrList] = useState([]);
   const [cidrInput, setCidrInput] = useState('');
+  const [height, setHeight] = useState(400);
+  const [width, setWidth] = useState(800);
 
   useEffect(() => {
     drawVisualization();
@@ -81,10 +85,19 @@ function App() {
     return [start, end];
   };
 
+  const onResize = (event, {node, size, handle}) => {;
+    setHeight(size.height);
+    setWidth(size.width);
+  };
+
   return (
     <div className="App">
       <h1>IPv4 CIDR Visualization</h1>
-      <Gantt />
+      <ResizableBox className="box" width={800} height={400} onResize={onResize} >
+
+      <Gantt w={width} h={height}/>
+
+      </ResizableBox>
       <div className="cidr-input">
         <input
           type="text"

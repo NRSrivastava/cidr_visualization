@@ -1,0 +1,9 @@
+.axises {
+    z-index: 10;
+    position: relative;
+}
+
+.bars {
+    z-index: 0;
+    position: relative;
+}
