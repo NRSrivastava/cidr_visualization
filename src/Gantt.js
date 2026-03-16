@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 import { numberToIpv4 } from './helpers.js';
-import { IPV4_MAX, MIN_BAR_PX, GANTT_THEME } from './constants.js';
+import { IPV4_MAX, MIN_BAR_PX, SVG_OVERFLOW_PAD, GANTT_THEME } from './constants.js';
 import './Gantt.css';
 
 const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dark' }) => {
@@ -167,7 +167,11 @@ const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dar
 
   }, [tasks, w, h, fitTrigger, theme]);
 
-  return <svg ref={svgRef} width={w} height={h} style={{ overflow: 'visible' }}></svg>;
+  return (
+      <div style={{ width: w + SVG_OVERFLOW_PAD, height: h + SVG_OVERFLOW_PAD, overflow: 'hidden' }}>
+        <svg ref={svgRef} width={w} height={h} style={{ overflow: 'visible' }}></svg>
+      </div>
+  );
 };
 
 export default GanttChart;

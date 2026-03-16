@@ -25,7 +25,9 @@ function App() {
   const [sidebarWidth, setSidebarWidth] = useState(() => Math.round(window.innerWidth * LAYOUT.SIDEBAR_INIT_VW));
   const [ganttHeight,  setGanttHeight]  = useState(() => Math.round(usableH() * LAYOUT.GANTT_INIT_VH));
   const [listHeight,   setListHeight]   = useState(() => Math.round(usableH() * LAYOUT.LIST_INIT_VH));
-  const [chartAreaWidth, setChartAreaWidth] = useState(800);
+  const [chartAreaWidth, setChartAreaWidth] = useState(
+    () => Math.round(window.innerWidth * (1 - LAYOUT.SIDEBAR_INIT_VW) - 60)
+  );
   const chartAreaRef = useRef(null);
 
   useEffect(() => {
