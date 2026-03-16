@@ -97,7 +97,10 @@ function App() {
     <div className={`App ${theme === 'light' ? 'light' : ''}`}>
 
       <div className="header">
-        <h1>IPv4 CIDR Visualizer</h1>
+        <div className="header-title">
+          <h1>CIDR Lens</h1>
+          <span className="header-tagline">IPv4 CIDR Calculator &amp; Visualizer</span>
+        </div>
         <button
           className="theme-toggle"
           onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
