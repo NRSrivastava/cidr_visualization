@@ -1,109 +1,190 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import {ipv4ToNumber, numberToIpv4} from './helpers.js';
-import './Gantt.css'
+import { numberToIpv4 } from './helpers.js';
+import './Gantt.css';
 
+const FULL_END = 4294967295; // 255.255.255.255 as uint32
+const MIN_BAR_PX = 2;        // minimum rendered bar width in pixels
 
-const GanttChart = ({ w="800", h="400",tasks = [
-  { task: "Planning", start: "100", end: "200" },
-  { task: "Development", start: 0, end: ipv4ToNumber('192.168.255.255') },
-  { task: "Testing", start: ipv4ToNumber('10.10.0.0'), end: ipv4ToNumber('169.168.0.0') },
-  { task: "Testing2", start: ipv4ToNumber('255.0.0.0'), end: ipv4ToNumber('255.255.255.255') },
-  { task: "Deployment", start: "0", end: "500" }
-] }) => {
+const THEME = {
+  dark: {
+    chartBg:   '#0a1628',
+    axisText:  '#6b7280',
+    axisLine:  '#374151',
+    emptyHint: '#445566',
+  },
+  light: {
+    chartBg:   '#f0f9ff',
+    axisText:  '#1e293b',
+    axisLine:  '#60a5fa',
+    emptyHint: '#64748b',
+  },
+};
+
+const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dark' }) => {
   const svgRef = useRef();
-  const transformRef = useRef();
+  const transformRef = useRef(null);
+  const prevTaskKeysRef = useRef('');
+  const prevFitTriggerRef = useRef(0);
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
-    const width = w;
-    const height = h;
-    const margin = { top: 20, right: 30, bottom: 50, left: 100 };
+    const width = +w;
+    const height = +h;
+    const margin = { top: 20, right: 30, bottom: 65, left: 150 };
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
+    const colors = THEME[theme] || THEME.dark;
 
-    // Clear previous content (optimize rendering updates)
     svg.selectAll('*').remove();
 
-    // Set up scales
-    const defaultStart = ipv4ToNumber('0.0.0.0');
-    const defaultEnd = ipv4ToNumber('255.255.255.255');
-
     const xScale = d3.scaleLinear()
-      .domain([
-        defaultStart,
-        defaultEnd
-      ])
+      .domain([0, FULL_END])
       .range([margin.left, width - margin.right]);
 
     const yScale = d3.scaleBand()
       .domain(tasks.map(d => d.task))
       .range([margin.top, height - margin.bottom])
-      .padding(0.1);
-      
-    // Draw bars
-    let view = {}
-    if (tasks && tasks.length > 0) {
-      view = svg.selectAll('rect')
+      .padding(0.2);
+
+    svg.append('defs')
+      .append('clipPath')
+      .attr('id', 'chart-clip')
+      .append('rect')
+      .attr('x', margin.left).attr('y', margin.top)
+      .attr('width', chartWidth).attr('height', chartHeight);
+
+    svg.append('rect')
+      .attr('x', margin.left).attr('y', margin.top)
+      .attr('width', chartWidth).attr('height', chartHeight)
+      .attr('fill', colors.chartBg);
+
+    const barsGroup = svg.append('g')
+      .attr('class', 'bars-group')
+      .attr('clip-path', 'url(#chart-clip)');
+
+    if (tasks.length > 0) {
+      barsGroup.selectAll('rect')
         .data(tasks)
         .enter()
         .append('rect')
-        .attr('class','bars')
+        .attr('class', 'bars')
         .attr('x', d => xScale(d.start))
         .attr('y', d => yScale(d.task))
         .attr('width', d => xScale(d.end) - xScale(d.start))
         .attr('height', yScale.bandwidth())
-        .attr('fill', 'steelblue');
-        
+        .attr('fill', d => d.color || 'steelblue')
+        .attr('opacity', 0.85)
+        .attr('rx', 2);
     }
 
-    // Draw axes
-    let xAxis = d3.axisBottom(xScale).ticks(10).tickFormat(numberToIpv4)
-    let gX = svg.append('g')
-      .attr('class','axises')
+    const xAxis = d3.axisBottom(xScale).ticks(8).tickFormat(numberToIpv4);
+    const gX = svg.append('g')
+      .attr('class', 'axises')
       .attr('transform', `translate(0,${height - margin.bottom})`)
       .call(xAxis);
-    
 
-    let yAxis = d3.axisLeft(yScale)
-    let gY = svg.append('g')
-      .attr('class','axises')
+    svg.append('g')
+      .attr('class', 'axises')
       .attr('transform', `translate(${margin.left},0)`)
-      .call(yAxis);
+      .call(d3.axisLeft(yScale));
 
+    gX.selectAll('text')
+      .style('text-anchor', 'end')
+      .attr('transform', 'rotate(-45)')
+      .attr('fill', colors.axisText);
 
-    if(transformRef.current){
-      view.attr('transform', `translate(${transformRef.current.x}, 0) scale(${transformRef.current.k}, 1)`);
-      gX.call(xAxis.scale(transformRef.current.rescaleX(xScale)));
+    svg.selectAll('.axises .domain, .axises .tick line')
+      .attr('stroke', colors.axisLine);
+
+    svg.selectAll('.axises text')
+      .attr('fill', colors.axisText);
+
+    if (tasks.length === 0) {
+      svg.append('text')
+        .attr('x', margin.left + chartWidth / 2)
+        .attr('y', margin.top + chartHeight / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', colors.emptyHint)
+        .attr('font-size', '13px')
+        .text('Add a CIDR block to visualize it here');
     }
-  
-    // Set up zoom with updated boundaries
+
     const zoom = d3.zoom()
-      .scaleExtent([1, 10000])
-      .translateExtent([[margin.left, 0], [width - margin.right, height - margin.bottom]]) // Dynamically updated boundaries
-      .extent([[margin.left, 0], [width - margin.right, height - margin.bottom]]) // Dynamically updated zoomable area
-      .on("zoom", zoomed);
+      .scaleExtent([1, FULL_END])
+      .translateExtent([[margin.left, 0], [width - margin.right, height]])
+      .extent([[margin.left, 0], [width - margin.right, height]])
+      .on('zoom', zoomed);
 
     svg.call(zoom);
 
+    // Horizontal scroll (deltaX) and Shift+scroll → pan instead of zoom.
+    // D3's wheel.zoom only uses deltaY, so we handle the horizontal axis here.
+    svg.on('wheel.pan', (event) => {
+      const isHoriz = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+      const isShift = event.shiftKey && event.deltaY !== 0;
+      if (!isHoriz && !isShift) return;   // let D3 handle vertical-only wheel (zoom)
+
+      event.preventDefault();
+      const pixelScale = event.deltaMode === 1 ? 20 : event.deltaMode === 2 ? 200 : 1;
+      const delta = (isHoriz ? event.deltaX : event.deltaY) * pixelScale;
+      const t = transformRef.current || d3.zoomIdentity;
+      svg.call(zoom.transform,
+        d3.zoomIdentity.translate(t.x - delta, t.y).scale(t.k));
+    }, { passive: false });
+
+    // Decide whether to re-fit or restore previous transform
+    const taskKeys = tasks.map(t => t.task).join(',');
+    const tasksChanged  = taskKeys !== prevTaskKeysRef.current;
+    const fitRequested  = fitTrigger !== prevFitTriggerRef.current;
+    prevTaskKeysRef.current   = taskKeys;
+    prevFitTriggerRef.current = fitTrigger;
+
+    if (tasks.length > 0 && (tasksChanged || fitRequested)) {
+      const minStart = Math.min(...tasks.map(t => t.start));
+      const maxEnd   = Math.max(...tasks.map(t => t.end));
+      const range    = Math.max(maxEnd - minStart, 256);
+      const pad      = range * 0.15;
+
+      const viewStart = Math.max(0,        minStart - pad);
+      const viewEnd   = Math.min(FULL_END, maxEnd   + pad);
+      const viewRange = viewEnd - viewStart;
+
+      const k  = FULL_END / viewRange;
+      const tx = margin.left - k * xScale(viewStart);
+
+      transformRef.current = d3.zoomIdentity.translate(tx, 0).scale(k);
+      svg.call(zoom.transform, transformRef.current);
+    } else if (transformRef.current) {
+      svg.call(zoom.transform, transformRef.current);
+    }
+
+    // Update bar positions using the rescaled xScale — crisp vector rendering.
+    // Bars narrower than MIN_BAR_PX are expanded symmetrically so they stay visible
+    // at every zoom level without distorting the axis labels.
     function zoomed({ transform }) {
-      transformRef.current=transform
-      view.attr("transform", `translate(${transform.x}, 0) scale(${transform.k}, 1)`);
-      gX.call(xAxis.scale(transform.rescaleX(xScale)));
-      gY.attr("transform", `translate(${margin.left}, 0)`);
+      transformRef.current = transform;
+      const zx = transform.rescaleX(xScale);
+
+      barsGroup.selectAll('.bars')
+        .attr('x', d => {
+          const pw = zx(d.end) - zx(d.start);
+          return pw < MIN_BAR_PX ? zx(d.start) - (MIN_BAR_PX - pw) / 2 : zx(d.start);
+        })
+        .attr('width', d => Math.max(MIN_BAR_PX, zx(d.end) - zx(d.start)));
+
+      gX.call(xAxis.scale(zx));
+      gX.selectAll('text')
+        .style('text-anchor', 'end')
+        .attr('transform', 'rotate(-45)')
+        .attr('fill', colors.axisText);
+      gX.selectAll('.domain, .tick line')
+        .attr('stroke', colors.axisLine);
     }
 
-    // Function to rotate text (to be used after every axis update)
-    function rotateXAxisLabels() {
-      gX.selectAll("text")  // Select tick labels
-          .style("text-anchor", "end")  // Keep text aligned properly
-          .attr("transform", "rotate(-60)");
-    }
+  }, [tasks, w, h, fitTrigger, theme]);
 
-  }, [tasks,w,h]);
-
-  return (
-    
-    <svg ref={svgRef} width={w} height={h}></svg>
-  );
+  return <svg ref={svgRef} width={w} height={h} style={{ overflow: 'visible' }}></svg>;
 };
 
 export default GanttChart;

@@ -1,9 +1,4 @@
-.axises {
-    z-index: 10;
-    position: relative;
-}
-
-.bars {
-    z-index: 0;
-    position: relative;
+.axises text {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 11px;
 }
