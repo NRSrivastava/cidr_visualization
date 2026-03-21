@@ -1,5 +1,7 @@
 # CIDR Lens
 
+![Alt text](images/cidr_lens_1.png)
+
 **IPv4 CIDR Calculator & Visualizer**
 
 > Visualize, calculate, and communicate network blocks — all in one place.
