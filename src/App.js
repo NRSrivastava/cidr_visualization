@@ -13,22 +13,47 @@ const validateCidr = (cidr) => {
   return true;
 };
 
+// Safe localStorage helpers
+const ls = {
+  get: (key, fallback) => {
+    try {
+      const v = localStorage.getItem(key);
+      return v !== null ? JSON.parse(v) : fallback;
+    } catch { return fallback; }
+  },
+  set: (key, value) => {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+  },
+};
+
 function App() {
-  const [cidrList, setCidrList] = useState([]);
+  const [cidrList, setCidrList] = useState(() => ls.get('cidr-lens:cidrList', []));
   const [cidrInput, setCidrInput] = useState('');
   const [selectedCidr, setSelectedCidr] = useState(null);
   const [fitTrigger, setFitTrigger] = useState(0);
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState(() => ls.get('cidr-lens:theme', 'dark'));
+  const [dragState, setDragState] = useState(null);
+  // dragState: { idx, dy, insertIdx, itemHeight } | null
+  const itemRefs = useRef([]);
 
-  // Pane sizes — initialised from viewport so proportions hold at any resolution
+  // Pane sizes — restored from localStorage, falling back to viewport-relative defaults
   const usableH = () => window.innerHeight - LAYOUT.HEADER_HEIGHT_PX;
-  const [sidebarWidth, setSidebarWidth] = useState(() => Math.round(window.innerWidth * LAYOUT.SIDEBAR_INIT_VW));
-  const [ganttHeight,  setGanttHeight]  = useState(() => Math.round(usableH() * LAYOUT.GANTT_INIT_VH));
-  const [listHeight,   setListHeight]   = useState(() => Math.round(usableH() * LAYOUT.LIST_INIT_VH));
-  const [chartAreaWidth, setChartAreaWidth] = useState(
-    () => Math.round(window.innerWidth * (1 - LAYOUT.SIDEBAR_INIT_VW) - 60)
-  );
+  const [sidebarWidth, setSidebarWidth] = useState(() =>
+    ls.get('cidr-lens:sidebarWidth', Math.round(window.innerWidth * LAYOUT.SIDEBAR_INIT_VW)));
+  const [ganttHeight,  setGanttHeight]  = useState(() =>
+    ls.get('cidr-lens:ganttHeight',  Math.round(usableH() * LAYOUT.GANTT_INIT_VH)));
+  const [listHeight,   setListHeight]   = useState(() =>
+    ls.get('cidr-lens:listHeight',   Math.round(usableH() * LAYOUT.LIST_INIT_VH)));
+  const [chartAreaWidth, setChartAreaWidth] = useState(null);
   const chartAreaRef = useRef(null);
+
+  useEffect(() => {
+    ls.set('cidr-lens:cidrList',    cidrList);
+    ls.set('cidr-lens:theme',       theme);
+    ls.set('cidr-lens:sidebarWidth', sidebarWidth);
+    ls.set('cidr-lens:ganttHeight',  ganttHeight);
+    ls.set('cidr-lens:listHeight',   listHeight);
+  }, [cidrList, theme, sidebarWidth, ganttHeight, listHeight]);
 
   useEffect(() => {
     if (!chartAreaRef.current) return;
@@ -83,6 +108,73 @@ function App() {
     setCidrInput('');
   };
 
+  const handleDragHandleMouseDown = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const rects = itemRefs.current.map(el => el ? el.getBoundingClientRect() : null);
+    const itemHeight = rects[index]?.height || 34;
+    const startY = e.clientY;
+    let currentInsertIdx = index;
+
+    const computeInsertIdx = (clientY) => {
+      const dy = clientY - startY;
+      const draggedCenter = rects[index].top + itemHeight / 2 + dy;
+      let insert = index;
+      for (let i = 0; i < rects.length; i++) {
+        if (i === index || !rects[i]) continue;
+        const center = rects[i].top + rects[i].height / 2;
+        if (i < index && draggedCenter < center) insert = Math.min(insert, i);
+        else if (i > index && draggedCenter > center) insert = i;
+      }
+      return insert;
+    };
+
+    setDragState({ idx: index, dy: 0, insertIdx: index, itemHeight });
+
+    const onMouseMove = (ev) => {
+      const dy = ev.clientY - startY;
+      currentInsertIdx = computeInsertIdx(ev.clientY);
+      setDragState({ idx: index, dy, insertIdx: currentInsertIdx, itemHeight });
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      if (index !== currentInsertIdx) {
+        setCidrList(list => {
+          const newList = [...list];
+          const [moved] = newList.splice(index, 1);
+          newList.splice(currentInsertIdx, 0, moved);
+          return newList;
+        });
+      }
+      setDragState(null);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  const getItemStyle = (index) => {
+    if (!dragState) return {};
+    const { idx, dy, insertIdx, itemHeight } = dragState;
+    const gap = itemHeight + 4; // 4px = margin-bottom
+    if (index === idx) {
+      return {
+        transform: `translateY(${dy}px)`,
+        zIndex: 100,
+        opacity: 0.85,
+        transition: 'none',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.22)',
+      };
+    }
+    let shift = 0;
+    if (idx < insertIdx && index > idx && index <= insertIdx) shift = -gap;
+    else if (idx > insertIdx && index < idx && index >= insertIdx) shift = gap;
+    return { transform: `translateY(${shift}px)`, transition: 'transform 0.15s ease' };
+  };
+
   const handleRemoveCidr = (cidr) => {
     setCidrList(cidrList.filter(c => c.cidr !== cidr));
     if (selectedCidr === cidr) setSelectedCidr(null);
@@ -100,7 +192,13 @@ function App() {
 
       <div className="header">
         <div className="header-title">
-          <h1>CIDR Lens</h1>
+          <h1>
+            {'CIDR Lens'.split('').map((char, i) => (
+              <span key={i} className="title-char" style={{ '--i': i }}>
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </h1>
           <span className="header-tagline">IPv4 CIDR Calculator &amp; Visualizer</span>
         </div>
         <button
@@ -132,15 +230,25 @@ function App() {
             </button>
           )}
 
-          <div className="cidr-list" style={{ height: listHeight, overflowY: 'auto' }}>
+          <div
+            className="cidr-list"
+            style={{ height: listHeight, overflowY: dragState ? 'visible' : 'auto' }}
+          >
             {cidrList.length === 0
               ? <p className="empty-hint">No CIDRs added yet.</p>
-              : cidrList.map(({ cidr, color }) => (
+              : cidrList.map(({ cidr, color }, index) => (
                 <div
                   key={cidr}
-                  className={`cidr-item${selectedCidr === cidr ? ' selected' : ''}`}
-                  onClick={() => setSelectedCidr(selectedCidr === cidr ? null : cidr)}
+                  ref={el => { itemRefs.current[index] = el; }}
+                  className={`cidr-item${selectedCidr === cidr ? ' selected' : ''}${dragState?.idx === index ? ' dragging' : ''}`}
+                  style={{ position: 'relative', ...getItemStyle(index) }}
+                  onClick={() => !dragState && setSelectedCidr(selectedCidr === cidr ? null : cidr)}
                 >
+                  <span
+                    className="cidr-drag-handle"
+                    onMouseDown={(e) => handleDragHandleMouseDown(e, index)}
+                    onClick={(e) => e.stopPropagation()}
+                  >⠿</span>
                   <span className="cidr-dot" style={{ background: color }} />
                   <span className="cidr-label">{cidr}</span>
                   <button
@@ -181,13 +289,17 @@ function App() {
         <div className="divider divider-v" onMouseDown={startVerticalDrag} />
 
         <div className="chart-area" ref={chartAreaRef}>
+          {chartAreaWidth !== null && (
           <Gantt
             w={chartAreaWidth}
             h={ganttHeight}
             tasks={tasks}
             fitTrigger={fitTrigger}
             theme={theme}
+            selectedCidr={selectedCidr}
+            onSelectCidr={(cidr) => setSelectedCidr(prev => prev === cidr ? null : cidr)}
           />
+          )}
           <div className="divider divider-h" onMouseDown={startHorizontalDrag} />
           <BinaryView
             cidrList={cidrList}

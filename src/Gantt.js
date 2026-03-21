@@ -4,11 +4,16 @@ import { numberToIpv4 } from './helpers.js';
 import { IPV4_MAX, MIN_BAR_PX, SVG_OVERFLOW_PAD, GANTT_THEME } from './constants.js';
 import './Gantt.css';
 
-const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dark' }) => {
+const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dark', selectedCidr = null, onSelectCidr }) => {
   const svgRef = useRef();
   const transformRef = useRef(null);
   const prevTaskKeysRef = useRef('');
   const prevFitTriggerRef = useRef(0);
+  // Stable refs so click handlers never capture stale closure values
+  const selectedCidrRef = useRef(selectedCidr);
+  const onSelectCidrRef = useRef(onSelectCidr);
+  useEffect(() => { selectedCidrRef.current = selectedCidr; }, [selectedCidr]);
+  useEffect(() => { onSelectCidrRef.current = onSelectCidr; }, [onSelectCidr]);
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
@@ -57,8 +62,15 @@ const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dar
         .attr('width', d => xScale(d.end) - xScale(d.start))
         .attr('height', yScale.bandwidth())
         .attr('fill', d => d.color || 'steelblue')
-        .attr('opacity', 0.85)
-        .attr('rx', 2);
+        .attr('opacity', d => selectedCidrRef.current === null ? 0.85 : d.task === selectedCidrRef.current ? 1.0 : 0.35)
+        .attr('stroke', d => d.task === selectedCidrRef.current ? colors.selectedStroke : 'none')
+        .attr('stroke-width', d => d.task === selectedCidrRef.current ? 1.5 : 0)
+        .attr('rx', 2)
+        .style('cursor', 'pointer')
+        .on('click', (event, d) => {
+          event.stopPropagation();
+          onSelectCidrRef.current?.(d.task);
+        });
     }
 
     const xAxis = d3.axisBottom(xScale).ticks(8).tickFormat(numberToIpv4);
@@ -167,9 +179,19 @@ const GanttChart = ({ w = 800, h = 400, tasks = [], fitTrigger = 0, theme = 'dar
 
   }, [tasks, w, h, fitTrigger, theme]);
 
+  // Update bar highlight whenever selection or theme changes — no full redraw needed
+  useEffect(() => {
+    const colors = GANTT_THEME[theme] || GANTT_THEME.dark;
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('.bars')
+      .attr('opacity', d => selectedCidr === null ? 0.85 : d.task === selectedCidr ? 1.0 : 0.35)
+      .attr('stroke', d => d.task === selectedCidr ? colors.selectedStroke : 'none')
+      .attr('stroke-width', d => d.task === selectedCidr ? 1.5 : 0);
+  }, [selectedCidr, theme]);
+
   return (
       <div style={{ width: w + SVG_OVERFLOW_PAD, height: h + SVG_OVERFLOW_PAD, overflow: 'hidden' }}>
-        <svg ref={svgRef} width={w} height={h} style={{ overflow: 'visible' }}></svg>
+        <svg ref={svgRef} width={w} height={h} style={{ overflow: 'visible', fontFamily: "'Courier New', Consolas, monospace" }}></svg>
       </div>
   );
 };
