@@ -11,4 +11,4 @@ body {
 
 /* body background tracks whichever theme .App is using */
 .App      { background: #111827; }
-.App.light { background: #bfdbfe; }
+.App.light { background: #eef3fe; }

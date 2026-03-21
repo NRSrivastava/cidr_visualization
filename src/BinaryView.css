@@ -22,7 +22,7 @@
 .binary-view--dark .octet-dot         { color: #6b7280; }
 .binary-view--dark .bit-cell--host    { background: #111827; border-color: #374151; color: #4b5563; }
 .binary-view--dark .span-host         { background: #111827; border: 1px solid #374151; color: #4b5563; }
-.binary-view--dark .binary-empty      { color: #4b5563; }
+.binary-view--dark .binary-empty      { color: var(--empty-hint); }
 .binary-view--dark .binary-label      { color: #6b7280; }
 
 /* ── Light ────────────────────────────────────── */
@@ -30,16 +30,16 @@
 .binary-view--light {
   background: #ffffff;
   border: 1px solid #3b82f6;
-  color: #0f172a;
+  color: #000000;
 }
 
-.binary-view--light .binary-row-label  { color: #1e293b; font-weight: 600; }
-.binary-view--light .octet-value       { color: #1e293b; font-weight: 700; }
+.binary-view--light .binary-row-label  { color: #020617; font-weight: 600; }
+.binary-view--light .octet-value       { color: #020617; font-weight: 700; }
 .binary-view--light .octet-dot         { color: #1d4ed8; }
-.binary-view--light .bit-cell--host    { background: #e2e8f0; border-color: #64748b; color: #374151; }
-.binary-view--light .span-host         { background: #e2e8f0; border: 1px solid #64748b; color: #374151; }
-.binary-view--light .binary-empty      { color: #475569; }
-.binary-view--light .binary-label      { color: #1e293b; font-weight: 600; }
+.binary-view--light .bit-cell--host    { background: #e2e8f0; border-color: #64748b; color: #1e293b; }
+.binary-view--light .span-host         { background: #e2e8f0; border: 1px solid #64748b; color: #1e293b; }
+.binary-view--light .binary-empty      { color: var(--empty-hint); }
+.binary-view--light .binary-label      { color: #020617; font-weight: 600; }
 
 /* ── Header ───────────────────────────────────── */
 
@@ -193,6 +193,7 @@
 }
 
 .binary-empty {
+  font-family: 'Courier New', Consolas, monospace;
   font-size: 0.78rem;
   text-align: center;
   padding: 8px 0;

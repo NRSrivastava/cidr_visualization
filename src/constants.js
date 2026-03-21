@@ -25,22 +25,24 @@ export const LAYOUT = {
   GANTT_MIN_VH:       0.15,
   GANTT_MAX_VH:       0.85,
 
-  LIST_INIT_VH:       0.54,  // CIDR list starting height inside sidebar
+  LIST_INIT_VH:       0.50,  // CIDR list starting height inside sidebar
   LIST_MIN_VH:        0.05,
 };
 
 // ── Theme colours (consumed by the D3 Gantt chart) ────────────────────────
 export const GANTT_THEME = {
   dark: {
-    chartBg:   '#0a1628',
-    axisText:  '#6b7280',
-    axisLine:  '#374151',
-    emptyHint: '#445566',
+    chartBg:        '#0a1628',
+    axisText:       '#cbd5e1',
+    axisLine:       '#374151',
+    emptyHint:      '#cbd5e1',
+    selectedStroke: '#ffffff',
   },
   light: {
-    chartBg:   '#f0f9ff',
-    axisText:  '#1e293b',
-    axisLine:  '#60a5fa',
-    emptyHint: '#64748b',
+    chartBg:        '#f0f9ff',
+    axisText:       '#0f172a',
+    axisLine:       '#60a5fa',
+    emptyHint:      '#0f172a',
+    selectedStroke: '#0f172a',
   },
 };
