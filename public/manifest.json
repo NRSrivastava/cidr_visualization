@@ -1,7 +1,12 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "CIDR Lens",
+  "name": "CIDR Lens — IPv4 CIDR Calculator & Visualizer",
   "icons": [
+    {
+      "src": "cidr_icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
     {
       "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
