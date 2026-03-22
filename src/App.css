@@ -73,8 +73,13 @@
 
 .header-title {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 14px;
+}
+
+.header-icon {
+  height: 3.2rem;
+  width: auto;
 }
 
 .header-tagline {
@@ -85,6 +90,7 @@
 
 .App h1 {
   margin: 0;
+  line-height: 1;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 2rem;
   letter-spacing: 0.06em;

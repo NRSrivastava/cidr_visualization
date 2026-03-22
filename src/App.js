@@ -192,6 +192,7 @@ function App() {
 
       <div className="header">
         <div className="header-title">
+          <img src="/cidr_icon.svg" alt="CIDR Lens icon" className="header-icon" />
           <h1>
             {'CIDR Lens'.split('').map((char, i) => (
               <span key={i} className="title-char" style={{ '--i': i }}>
