@@ -6,13 +6,6 @@ import BinaryView from './BinaryView.js';
 import CidrInput from './CidrInput.js';
 import { CIDR_COLORS, LAYOUT } from './constants.js';
 
-const validateCidr = (cidr) => {
-  if (!/^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/.test(cidr)) return false;
-  const [ip, prefix] = cidr.split('/');
-  if (ip.split('.').map(Number).some(p => p > 255)) return false;
-  if (parseInt(prefix) > 32) return false;
-  return true;
-};
 
 // Safe localStorage helpers
 const ls = {
