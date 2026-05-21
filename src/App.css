@@ -25,6 +25,12 @@
   --fit-hover-color:  #93c5fd;
   --empty-hint:       #cbd5e1;
   --divider-dot:      rgba(255, 255, 255, 0.25);
+  --oct-bg:           #162032;
+  --oct-border:       #2d5080;
+  --oct-focus:        #93c5fd;
+  --pre-bg:           #0e2525;
+  --pre-border:       #1a6060;
+  --pre-focus:        #2dd4bf;
 
   padding: 20px 24px;
   font-family: 'Courier New', Consolas, monospace;
@@ -59,6 +65,12 @@
   --fit-hover-color:  #1d4ed8;
   --empty-hint:       #0f172a;
   --divider-dot:      rgba(30, 64, 175, 0.35);
+  --oct-bg:           #eff6ff;
+  --oct-border:       #93c5fd;
+  --oct-focus:        #1d4ed8;
+  --pre-bg:           #f0fdfa;
+  --pre-border:       #5eead4;
+  --pre-focus:        #0d9488;
 }
 
 /* ── Header ───────────────────────────────────── */
@@ -110,6 +122,31 @@
   opacity: 0;
   animation: titleCharIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   animation-delay: calc(var(--i) * 55ms);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.about-link {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.about-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .theme-toggle {
@@ -222,41 +259,90 @@
 
 .cidr-input {
   display: flex;
+  align-items: center;
   gap: 6px;
   margin-bottom: 12px;
 }
 
-.cidr-input input {
+.cidr-fields {
+  display: flex;
+  align-items: center;
+  gap: 3px;
   flex: 1;
-  padding: 6px 10px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
+  min-width: 0;
+}
+
+.cidr-octet {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  text-align: center;
+  background: var(--oct-bg);
+  border: 1.5px solid var(--oct-border);
+  border-radius: 6px;
   color: var(--text);
-  border-radius: 4px;
+  font-size: 1rem;
   font-family: inherit;
-  font-size: 0.82rem;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.cidr-input input::placeholder {
+.cidr-octet:focus {
+  border-color: var(--oct-focus);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--oct-focus) 25%, transparent);
+}
+
+.cidr-prefix {
+  flex: 0.65;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  text-align: center;
+  background: var(--pre-bg);
+  border: 1.5px solid var(--pre-border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.cidr-prefix:focus {
+  border-color: var(--pre-focus);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pre-focus) 25%, transparent);
+}
+
+.cidr-octet::placeholder,
+.cidr-prefix::placeholder {
   color: var(--text-muted);
+  opacity: 0.5;
 }
 
-.cidr-input input:focus {
-  border-color: var(--accent);
+.cidr-sep {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-weight: 700;
+  user-select: none;
+  flex-shrink: 0;
+  text-align: center;
+  width: 10px;
 }
 
 .cidr-input button {
-  padding: 6px 12px;
+  height: 44px;
+  padding: 0 14px;
   background: var(--btn-bg);
-  border: none;
+  border: 1.5px solid var(--selected-border);
   color: #fff;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: background 0.15s;
 }
 
@@ -264,15 +350,20 @@
   background: var(--btn-hover);
 }
 
-/* ── Fit button ───────────────────────────────── */
+/* ── Fit / Clear buttons ──────────────────────── */
 
-.fit-btn {
-  width: 100%;
-  padding: 5px;
+.action-btns {
+  display: flex;
+  gap: 6px;
   margin-bottom: 8px;
+}
+
+.fit-btn,
+.clear-btn {
+  flex: 1;
+  padding: 5px;
   background: none;
   border: 1px solid var(--border);
-  color: var(--fit-color);
   border-radius: 4px;
   cursor: pointer;
   font-family: inherit;
@@ -281,9 +372,22 @@
   transition: border-color 0.15s, color 0.15s;
 }
 
+.fit-btn {
+  color: var(--fit-color);
+}
+
 .fit-btn:hover {
   border-color: var(--fit-hover-border);
   color: var(--fit-hover-color);
+}
+
+.clear-btn {
+  color: var(--remove-hover);
+  border-color: var(--border);
+}
+
+.clear-btn:hover {
+  border-color: var(--remove-hover);
 }
 
 /* ── CIDR list ────────────────────────────────── */
