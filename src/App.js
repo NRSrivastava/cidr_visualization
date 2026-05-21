@@ -3,6 +3,7 @@ import './App.css';
 import Gantt from './Gantt.js';
 import { getCidrInfo } from './helpers.js';
 import BinaryView from './BinaryView.js';
+import CidrInput from './CidrInput.js';
 import { CIDR_COLORS, LAYOUT } from './constants.js';
 
 const validateCidr = (cidr) => {
@@ -28,7 +29,6 @@ const ls = {
 
 function App() {
   const [cidrList, setCidrList] = useState(() => ls.get('cidr-lens:cidrList', []));
-  const [cidrInput, setCidrInput] = useState('');
   const [selectedCidr, setSelectedCidr] = useState(null);
   const [fitTrigger, setFitTrigger] = useState(0);
   const [theme, setTheme] = useState(() => ls.get('cidr-lens:theme', 'dark'));
@@ -99,13 +99,10 @@ function App() {
     document.addEventListener('mouseup', onUp);
   };
 
-  const handleAddCidr = () => {
-    const trimmed = cidrInput.trim();
-    if (!validateCidr(trimmed)) { alert('Invalid CIDR format'); return; }
-    if (cidrList.find(c => c.cidr === trimmed)) { alert('CIDR already added'); return; }
+  const handleAddCidr = (cidr) => {
+    if (cidrList.find(c => c.cidr === cidr)) { alert('CIDR already added'); return; }
     const color = CIDR_COLORS[cidrList.length % CIDR_COLORS.length];
-    setCidrList([...cidrList, { cidr: trimmed, color }]);
-    setCidrInput('');
+    setCidrList([...cidrList, { cidr, color }]);
   };
 
   const handleDragHandleMouseDown = (e, index) => {
@@ -202,33 +199,36 @@ function App() {
           </h1>
           <span className="header-tagline">IPv4 CIDR Calculator &amp; Visualizer</span>
         </div>
-        <button
-          className="theme-toggle"
-          onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-        >
-          {theme === 'dark' ? '[ Light Mode ]' : '[ Dark Mode ]'}
-        </button>
+        <div className="header-actions">
+          <a
+            className="about-link"
+            href="https://github.com/NRSrivastava/cidr_visualization"
+            target="_blank"
+            rel="noopener noreferrer"
+          >[ About ]</a>
+          <button
+            className="theme-toggle"
+            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? '[ Light Mode ]' : '[ Dark Mode ]'}
+          </button>
+        </div>
       </div>
 
       <div className="layout">
 
         <div className="sidebar" style={{ width: sidebarWidth }}>
-          <div className="cidr-input">
-            <input
-              type="text"
-              value={cidrInput}
-              onChange={(e) => setCidrInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddCidr()}
-              placeholder="e.g. 10.0.0.0/8"
-              spellCheck={false}
-            />
-            <button onClick={handleAddCidr}>Add</button>
-          </div>
+          <CidrInput onAdd={handleAddCidr} />
 
           {cidrList.length > 0 && (
-            <button className="fit-btn" onClick={() => setFitTrigger(f => f + 1)}>
-              Fit All
-            </button>
+            <div className="action-btns">
+              <button className="fit-btn" onClick={() => setFitTrigger(f => f + 1)}>
+                Fit All
+              </button>
+              <button className="clear-btn" onClick={() => { setCidrList([]); setSelectedCidr(null); }}>
+                Clear All
+              </button>
+            </div>
           )}
 
           <div
