@@ -195,6 +195,12 @@ function App() {
         <div className="header-actions">
           <a
             className="about-link"
+            href="https://neelesh.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+          >[ Made by Neelesh ]</a>
+          <a
+            className="about-link"
             href="https://github.com/NRSrivastava/cidr_visualization"
             target="_blank"
             rel="noopener noreferrer"
