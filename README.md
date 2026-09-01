@@ -8,7 +8,7 @@
 
 CIDR Lens is a browser-based tool for network administrators and security professionals who need to think clearly about IP address space. Add one or more CIDR blocks, see them plotted side-by-side on a shared IPv4 number line, inspect their binary structure, and read off all subnet math at a glance — no backend, no install, just open and go.
 
-**Live:** [cidr.neelesh.dev](https://cidr.neelesh.dev)
+**Live:** [cidrlens.xyz](https://cidrlens.xyz)
 
 ---
 
